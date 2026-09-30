@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      board_messages: {
+        Row: {
+          agent_reply: string
+          borough: string
+          category: string
+          channel: string
+          created_at: string
+          id: string
+          summary: string
+          transcript: string
+          urgency: string
+        }
+        Insert: {
+          agent_reply?: string
+          borough?: string
+          category?: string
+          channel: string
+          created_at?: string
+          id?: string
+          summary?: string
+          transcript: string
+          urgency?: string
+        }
+        Update: {
+          agent_reply?: string
+          borough?: string
+          category?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          summary?: string
+          transcript?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
