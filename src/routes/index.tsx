@@ -36,21 +36,24 @@ function Index() {
           One number for every neighbor. Simulated calls (voiced live) and text reports, as they'd arrive before routing.
         </p>
         <div className="mt-6 flex gap-2">
-          {(["voice", "board", "calls", "sms", "intake"] as const).map((t) => (
+          {(["voice", "board", "calls", "sms"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex items-center gap-2 border-2 border-foreground px-4 py-2 font-mono text-sm uppercase ${tab === t ? "bg-foreground text-background" : ""}`}
             >
-              {t === "voice" ? <Mic className="h-4 w-4" /> : t === "board" ? <LayoutList className="h-4 w-4" /> : t === "calls" ? <Phone className="h-4 w-4" /> : t === "sms" ? <MessageSquare className="h-4 w-4" /> : <Workflow className="h-4 w-4" />}
-              {t === "voice" ? "Leave a message" : t === "board" ? "Message board" : t === "calls" ? `Voice calls (${calls.length})` : t === "sms" ? `SMS (${sms.length})` : "How intake works"}
+              {t === "voice" ? <Mic className="h-4 w-4" /> : t === "board" ? <LayoutList className="h-4 w-4" /> : t === "calls" ? <Phone className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+              {t === "voice" ? "Leave a message" : t === "board" ? "Message board" : t === "calls" ? `Voice calls (${calls.length})` : `SMS (${sms.length})`}
             </button>
           ))}
         </div>
       </header>
-      {tab === "voice" ? <VoiceMessage /> : tab === "board" ? <MessageBoard /> : tab === "intake" ? (
-        <IntakeDemo />
-      ) : (
+      {tab === "voice" ? (
+        <div>
+          <VoiceMessage />
+          <IntakeDemo />
+        </div>
+      ) : tab === "board" ? <MessageBoard /> : (
       <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
         {tab === "calls" ? calls.map((c) => <CallCard key={c.id} call={c} />) : sms.map((s) => (
           <article key={s.id} className="border-2 border-foreground bg-card">
