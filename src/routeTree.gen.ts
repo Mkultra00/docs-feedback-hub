@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiVoicemailRouteImport } from './routes/api/voicemail'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
   path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoicemailRoute = ApiVoicemailRouteImport.update({
+  id: '/api/voicemail',
+  path: '/api/voicemail',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/voicemail': typeof ApiVoicemailRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/voicemail': typeof ApiVoicemailRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/voicemail': typeof ApiVoicemailRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/tts'
+  fullPaths: '/' | '/api/tts' | '/api/voicemail'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/tts'
-  id: '__root__' | '/' | '/api/tts'
+  to: '/' | '/api/tts' | '/api/voicemail'
+  id: '__root__' | '/' | '/api/tts' | '/api/voicemail'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiTtsRoute: typeof ApiTtsRoute
+  ApiVoicemailRoute: typeof ApiVoicemailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voicemail': {
+      id: '/api/voicemail'
+      path: '/api/voicemail'
+      fullPath: '/api/voicemail'
+      preLoaderRoute: typeof ApiVoicemailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiTtsRoute: ApiTtsRoute,
+  ApiVoicemailRoute: ApiVoicemailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

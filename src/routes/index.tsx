@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Phone, MessageSquare, Play, Square, Loader2, Send, CheckCircle2, Workflow } from "lucide-react";
+import { Phone, MessageSquare, Play, Square, Loader2, Send, CheckCircle2, Workflow, Mic } from "lucide-react";
+import { VoiceMessage } from "@/components/VoiceMessage";
 import { calls, sms, LINE_VOICE, type Call } from "@/lib/mock-intake";
 
 export const Route = createFileRoute("/")({
@@ -24,7 +25,7 @@ const urgencyClass = {
 };
 
 function Index() {
-  const [tab, setTab] = useState<"calls" | "sms" | "intake">("calls");
+  const [tab, setTab] = useState<"calls" | "sms" | "intake" | "voice">("calls");
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b-4 border-foreground px-6 py-8 md:px-12">
@@ -34,19 +35,19 @@ function Index() {
           One number for every neighbor. Simulated calls (voiced live) and text reports, as they'd arrive before routing.
         </p>
         <div className="mt-6 flex gap-2">
-          {(["calls", "sms", "intake"] as const).map((t) => (
+          {(["voice", "calls", "sms", "intake"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex items-center gap-2 border-2 border-foreground px-4 py-2 font-mono text-sm uppercase ${tab === t ? "bg-foreground text-background" : ""}`}
             >
-              {t === "calls" ? <Phone className="h-4 w-4" /> : t === "sms" ? <MessageSquare className="h-4 w-4" /> : <Workflow className="h-4 w-4" />}
-              {t === "calls" ? `Voice calls (${calls.length})` : t === "sms" ? `SMS (${sms.length})` : "How intake works"}
+              {t === "voice" ? <Mic className="h-4 w-4" /> : t === "calls" ? <Phone className="h-4 w-4" /> : t === "sms" ? <MessageSquare className="h-4 w-4" /> : <Workflow className="h-4 w-4" />}
+              {t === "voice" ? "Leave a message" : t === "calls" ? `Voice calls (${calls.length})` : t === "sms" ? `SMS (${sms.length})` : "How intake works"}
             </button>
           ))}
         </div>
       </header>
-      {tab === "intake" ? (
+      {tab === "voice" ? <VoiceMessage /> : tab === "intake" ? (
         <IntakeDemo />
       ) : (
       <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
