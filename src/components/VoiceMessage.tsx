@@ -12,6 +12,8 @@ export function VoiceMessage() {
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
   const [reply, setReply] = useState("");
+  const [typed, setTyped] = useState("");
+  const [sending, setSending] = useState(false);
   const audio = useRef<HTMLAudioElement | null>(null);
   const rec = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -98,6 +100,21 @@ export function VoiceMessage() {
     }
   }
 
+  async function sendText(e: React.FormEvent) {
+    e.preventDefault();
+    if (!typed.trim()) return;
+    setError(null); setTranscript(typed.trim()); setReply(""); setSending(true);
+    try {
+      const fd = new FormData();
+      fd.append("text", typed.trim());
+      const r = await fetch("/api/voicemail", { method: "POST", body: fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Something went wrong.");
+      setReply(data.reply); setTyped("");
+    } catch (err) { setError((err as Error).message); }
+    finally { setSending(false); }
+  }
+
   function hangUp() {
     audio.current?.pause();
     if (rec.current?.state === "recording") { rec.current.onstop = null; rec.current.stop(); }
@@ -139,6 +156,12 @@ export function VoiceMessage() {
             <PhoneOff className="h-3 w-3" /> Hang up
           </button>
         )}
+        <form onSubmit={sendText} className="mt-8 flex gap-2 border-t-2 border-foreground pt-6">
+          <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Or type your message…" className="flex-1 border-2 border-foreground bg-background px-3 py-2 text-sm" />
+          <button disabled={sending || !typed.trim()} className="border-2 border-foreground bg-foreground px-4 py-2 font-mono text-xs uppercase text-background disabled:opacity-50">
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
+          </button>
+        </form>
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
         {(transcript || reply) && (
           <div className="mt-6 space-y-3 text-left text-sm">
