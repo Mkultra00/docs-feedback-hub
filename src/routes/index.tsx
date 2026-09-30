@@ -91,6 +91,11 @@ function CallCard({ call }: { call: Call }) {
     stopRef.current = false;
     setError(null);
     setState("loading");
+    // Unlock audio synchronously within the click so later playback isn't blocked.
+    const player = audioRef.current ?? new Audio();
+    audioRef.current = player;
+    player.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+    player.play().catch(() => {});
     try {
       const urls = await Promise.all(
         call.transcript.map(async (t) => {
@@ -106,12 +111,11 @@ function CallCard({ call }: { call: Call }) {
       setState("playing");
       for (let i = 0; i < urls.length && !stopRef.current; i++) {
         setActive(i);
-        await new Promise<void>((res) => {
-          const a = new Audio(urls[i]);
-          audioRef.current = a;
-          a.onended = () => res();
-          a.onerror = () => res();
-          a.play().catch(() => res());
+        await new Promise<void>((res, rej) => {
+          player.onended = () => res();
+          player.onerror = () => res();
+          player.src = urls[i]!;
+          player.play().catch((err) => rej(new Error(`Browser blocked audio: ${err?.message ?? err}`)));
         });
       }
     } catch (e) {
