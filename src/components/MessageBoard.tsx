@@ -37,7 +37,7 @@ export function MessageBoard() {
             <span>{r.channel}</span>
             <span>· {r.borough}</span>
             <span className="border border-foreground px-2">{r.category}</span>
-            <span className={`px-2 ${urg[r.urgency] ?? urg.medium}`}>{r.urgency}</span>
+            <span className={`px-2 ${urg[r.urgency] ?? urg["medium"]}`}>{r.urgency}</span>
             <span className="ml-auto text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
           </div>
           <div className="space-y-2 p-4 text-sm">
