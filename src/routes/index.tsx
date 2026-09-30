@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Play, Square, Loader2, Send, CheckCircle2, Mic, LayoutList } from "lucide-react";
 import { MessageBoard } from "@/components/MessageBoard";
+import { RoutingWorkflow } from "@/components/RoutingWorkflow";
 import { VoiceMessage } from "@/components/VoiceMessage";
 import { calls, sms, LINE_VOICE, type Call } from "@/lib/mock-intake";
 
@@ -62,21 +63,7 @@ function Index() {
           </div>
           <section className="grid gap-6 px-6 pb-8 md:grid-cols-2 md:px-12">
             {calls.map((c) => <CallCard key={c.id} call={c} />)}
-            {sms.map((s) => (
-              <article key={s.id} className="border-2 border-foreground bg-card">
-                <Meta id={s.id} phone={s.phone} district={`${s.borough} · ${s.district}`} category={s.category} urgency={s.urgency} />
-                <div className="space-y-2 p-4">
-                  {s.messages.map((m, i) => (
-                    <div key={i} className={`flex ${m.from === "resident" ? "justify-start" : "justify-end"}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${m.from === "resident" ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
-                        {m.text}
-                        <div className="mt-1 font-mono text-[10px] opacity-60">{m.at}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            ))}
+            {sms.map((s) => <SmsCard key={s.id} s={s} />)}
           </section>
         </div>
       )}
