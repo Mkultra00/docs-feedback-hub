@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mic, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { RoutingWorkflow } from "@/components/RoutingWorkflow";
 
 type Row = {
   id: string; channel: string; transcript: string; summary: string; category: string;
@@ -15,6 +16,7 @@ const urg: Record<string, string> = {
 
 export function MessageBoard() {
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = () =>
@@ -32,18 +34,30 @@ export function MessageBoard() {
     <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
       {rows.map((r) => (
         <article key={r.id} className="border-2 border-foreground bg-card">
-          <div className="flex flex-wrap items-center gap-2 border-b-2 border-foreground px-4 py-2 font-mono text-xs uppercase">
-            {r.channel === "voice" ? <Mic className="h-3 w-3" /> : <MessageSquare className="h-3 w-3" />}
-            <span>{r.channel}</span>
-            <span>· {r.borough}</span>
-            <span className="border border-foreground px-2">{r.category}</span>
-            <span className={`px-2 ${urg[r.urgency] ?? urg["medium"]}`}>{r.urgency}</span>
-            <span className="ml-auto text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
-          </div>
-          <div className="space-y-2 p-4 text-sm">
-            <p className="font-semibold">{r.summary}</p>
-            <p className="text-muted-foreground">"{r.transcript}"</p>
-          </div>
+          <button
+            onClick={() => setOpenId(openId === r.id ? null : r.id)}
+            className="block w-full text-left"
+            aria-expanded={openId === r.id}
+          >
+            <div className="flex flex-wrap items-center gap-2 border-b-2 border-foreground px-4 py-2 font-mono text-xs uppercase">
+              {r.channel === "voice" ? <Mic className="h-3 w-3" /> : <MessageSquare className="h-3 w-3" />}
+              <span>{r.channel}</span>
+              <span>· {r.borough}</span>
+              <span className="border border-foreground px-2">{r.category}</span>
+              <span className={`px-2 ${urg[r.urgency] ?? urg["medium"]}`}>{r.urgency}</span>
+              <span className="ml-auto text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
+            </div>
+            <div className="space-y-2 p-4 text-sm">
+              <p className="font-semibold">{r.summary}</p>
+              <p className="text-muted-foreground">"{r.transcript}"</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {openId === r.id ? "Hide routing ▲" : "See where this goes ▼"}
+              </p>
+            </div>
+          </button>
+          {openId === r.id && (
+            <RoutingWorkflow category={r.category} borough={r.borough} onClose={() => setOpenId(null)} />
+          )}
         </article>
       ))}
     </section>
