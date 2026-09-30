@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Phone, MessageSquare, Play, Square, Loader2, Send, CheckCircle2, Mic, LayoutList } from "lucide-react";
+import { Play, Square, Loader2, Send, CheckCircle2, Mic, LayoutList } from "lucide-react";
 import { MessageBoard } from "@/components/MessageBoard";
 import { VoiceMessage } from "@/components/VoiceMessage";
 import { calls, sms, LINE_VOICE, type Call } from "@/lib/mock-intake";
@@ -26,7 +26,7 @@ const urgencyClass = {
 };
 
 function Index() {
-  const [tab, setTab] = useState<"calls" | "sms" | "voice" | "board">("calls");
+  const [tab, setTab] = useState<"voice" | "board">("board");
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b-4 border-foreground px-6 py-8 md:px-12">
@@ -36,14 +36,14 @@ function Index() {
           One number for every neighbor. Simulated calls (voiced live) and text reports, as they'd arrive before routing.
         </p>
         <div className="mt-6 flex gap-2">
-          {(["voice", "board", "calls", "sms"] as const).map((t) => (
+          {(["board", "voice"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex items-center gap-2 border-2 border-foreground px-4 py-2 font-mono text-sm uppercase ${tab === t ? "bg-foreground text-background" : ""}`}
             >
-              {t === "voice" ? <Mic className="h-4 w-4" /> : t === "board" ? <LayoutList className="h-4 w-4" /> : t === "calls" ? <Phone className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-              {t === "voice" ? "Leave a message" : t === "board" ? "Message board" : t === "calls" ? `Voice calls (${calls.length})` : `SMS (${sms.length})`}
+              {t === "voice" ? <Mic className="h-4 w-4" /> : <LayoutList className="h-4 w-4" />}
+              {t === "voice" ? "Leave a message" : "Message board"}
             </button>
           ))}
         </div>
@@ -53,24 +53,32 @@ function Index() {
           <VoiceMessage />
           <IntakeDemo />
         </div>
-      ) : tab === "board" ? <MessageBoard /> : (
-      <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
-        {tab === "calls" ? calls.map((c) => <CallCard key={c.id} call={c} />) : sms.map((s) => (
-          <article key={s.id} className="border-2 border-foreground bg-card">
-            <Meta id={s.id} phone={s.phone} district={`${s.borough} · ${s.district}`} category={s.category} urgency={s.urgency} />
-            <div className="space-y-2 p-4">
-              {s.messages.map((m, i) => (
-                <div key={i} className={`flex ${m.from === "resident" ? "justify-start" : "justify-end"}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${m.from === "resident" ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
-                    {m.text}
-                    <div className="mt-1 font-mono text-[10px] opacity-60">{m.at}</div>
-                  </div>
+      ) : (
+        <div>
+          <MessageBoard />
+          <div className="border-t-4 border-foreground px-6 py-8 md:px-12">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">Simulated intake · demo data</p>
+            <h2 className="mt-2 text-3xl font-black uppercase">Sample calls & texts</h2>
+          </div>
+          <section className="grid gap-6 px-6 pb-8 md:grid-cols-2 md:px-12">
+            {calls.map((c) => <CallCard key={c.id} call={c} />)}
+            {sms.map((s) => (
+              <article key={s.id} className="border-2 border-foreground bg-card">
+                <Meta id={s.id} phone={s.phone} district={`${s.borough} · ${s.district}`} category={s.category} urgency={s.urgency} />
+                <div className="space-y-2 p-4">
+                  {s.messages.map((m, i) => (
+                    <div key={i} className={`flex ${m.from === "resident" ? "justify-start" : "justify-end"}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${m.from === "resident" ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
+                        {m.text}
+                        <div className="mt-1 font-mono text-[10px] opacity-60">{m.at}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </article>
-        ))}
-      </section>
+              </article>
+            ))}
+          </section>
+        </div>
       )}
     </main>
   );
