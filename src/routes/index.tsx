@@ -183,7 +183,15 @@ function CallCard({ call }: { call: Call }) {
             </li>
           ))}
         </ol>
+        <button
+          onClick={() => setShowRoute(!showRoute)}
+          aria-expanded={showRoute}
+          className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground underline"
+        >
+          {showRoute ? "Hide routing ▲" : "See where this goes ▼"}
+        </button>
       </div>
+      {showRoute && <RoutingWorkflow category={call.category} borough={call.borough} district={call.district} onClose={() => setShowRoute(false)} />}
     </article>
   );
 }
