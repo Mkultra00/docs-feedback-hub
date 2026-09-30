@@ -84,8 +84,34 @@ function Meta(p: { id: string; phone: string; district: string; category: string
   );
 }
 
+function SmsCard({ s }: { s: (typeof sms)[number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article className="border-2 border-foreground bg-card">
+      <button onClick={() => setOpen(!open)} className="block w-full text-left" aria-expanded={open}>
+        <Meta id={s.id} phone={s.phone} district={`${s.borough} · ${s.district}`} category={s.category} urgency={s.urgency} />
+        <div className="space-y-2 p-4">
+          {s.messages.map((m, i) => (
+            <div key={i} className={`flex ${m.from === "resident" ? "justify-start" : "justify-end"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${m.from === "resident" ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
+                {m.text}
+                <div className="mt-1 font-mono text-[10px] opacity-60">{m.at}</div>
+              </div>
+            </div>
+          ))}
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            {open ? "Hide routing ▲" : "See where this goes ▼"}
+          </p>
+        </div>
+      </button>
+      {open && <RoutingWorkflow category={s.category} borough={s.borough} district={s.district} onClose={() => setOpen(false)} />}
+    </article>
+  );
+}
+
 function CallCard({ call }: { call: Call }) {
   const [state, setState] = useState<"idle" | "loading" | "playing">("idle");
+  const [showRoute, setShowRoute] = useState(false);
   const [active, setActive] = useState(-1);
   const [error, setError] = useState<string | null>(null);
   const stopRef = useRef(false);
