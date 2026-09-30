@@ -24,7 +24,7 @@ const urgencyClass = {
 };
 
 function Index() {
-  const [tab, setTab] = useState<"calls" | "sms">("calls");
+  const [tab, setTab] = useState<"calls" | "sms" | "intake">("calls");
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b-4 border-foreground px-6 py-8 md:px-12">
