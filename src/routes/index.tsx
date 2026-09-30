@@ -34,18 +34,21 @@ function Index() {
           One number for every neighbor. Simulated calls (voiced live) and text reports, as they'd arrive before routing.
         </p>
         <div className="mt-6 flex gap-2">
-          {(["calls", "sms"] as const).map((t) => (
+          {(["calls", "sms", "intake"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex items-center gap-2 border-2 border-foreground px-4 py-2 font-mono text-sm uppercase ${tab === t ? "bg-foreground text-background" : ""}`}
             >
-              {t === "calls" ? <Phone className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-              {t === "calls" ? `Voice calls (${calls.length})` : `SMS (${sms.length})`}
+              {t === "calls" ? <Phone className="h-4 w-4" /> : t === "sms" ? <MessageSquare className="h-4 w-4" /> : <Workflow className="h-4 w-4" />}
+              {t === "calls" ? `Voice calls (${calls.length})` : t === "sms" ? `SMS (${sms.length})` : "How intake works"}
             </button>
           ))}
         </div>
       </header>
+      {tab === "intake" ? (
+        <IntakeDemo />
+      ) : (
       <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
         {tab === "calls" ? calls.map((c) => <CallCard key={c.id} call={c} />) : sms.map((s) => (
           <article key={s.id} className="border-2 border-foreground bg-card">
