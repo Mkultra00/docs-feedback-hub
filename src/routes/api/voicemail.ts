@@ -96,20 +96,29 @@ export const Route = createFileRoute("/api/voicemail")({
           if (!transcript) return Response.json({ error: "We didn't catch any words — try speaking a bit closer to the mic." }, { status: 400 });
         }
 
+        let r: Result;
         try {
-          const r = await analyze(transcript, ai);
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { error } = await supabaseAdmin.from("board_messages").insert({
-            channel, transcript, summary: r.summary, category: r.category, urgency: r.urgency, borough: r.borough, agent_reply: r.reply,
-          });
-          if (error) console.error("Board insert failed", error);
-          return Response.json({ transcript, ...r });
+          r = await analyze(transcript, ai);
         } catch (e) {
-          const status = (e as { status?: number }).status ?? 500;
-          console.error(e);
-          const msg = status === 402 ? "AI credits have run out." : status === 429 ? "Too many requests — try again shortly." : "The agent couldn't respond right now.";
-          return Response.json({ error: msg, transcript }, { status });
+          // Always post to the board, even if classification fails.
+          console.error("Analyze failed, saving unclassified", e);
+          r = {
+            reply: "Thank you for telling us about this. Your message has been logged and will be shared with your local Community Board. If anyone is in immediate danger, please call 911.",
+            summary: transcript.slice(0, 140),
+            category: "Other",
+            urgency: "medium",
+            borough: "Unknown",
+          };
         }
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error } = await supabaseAdmin.from("board_messages").insert({
+          channel, transcript, summary: r.summary, category: r.category, urgency: r.urgency, borough: r.borough, agent_reply: r.reply,
+        });
+        if (error) {
+          console.error("Board insert failed", error);
+          return Response.json({ error: "Your message was heard but couldn't be posted to the board. Please try again.", transcript }, { status: 500 });
+        }
+        return Response.json({ transcript, ...r });
       },
     },
   },
