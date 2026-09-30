@@ -114,7 +114,7 @@ function CallCard({ call }: { call: Call }) {
         await new Promise<void>((res, rej) => {
           player.onended = () => res();
           player.onerror = () => res();
-          player.src = urls[i];
+          player.src = urls[i]!;
           player.play().catch((err) => rej(new Error(`Browser blocked audio: ${err?.message ?? err}`)));
         });
       }
