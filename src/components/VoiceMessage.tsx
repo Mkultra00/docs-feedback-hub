@@ -7,7 +7,7 @@ const GREETING =
 
 type Phase = "idle" | "greeting" | "recording" | "thinking" | "replying" | "done";
 
-export function VoiceMessage() {
+export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -168,6 +168,11 @@ export function VoiceMessage() {
             {transcript && <div className="rounded-2xl bg-muted px-3 py-2"><span className="font-mono text-xs uppercase text-muted-foreground">You said</span><p>{transcript}</p></div>}
             {reply && <div className="rounded-2xl bg-primary px-3 py-2 text-primary-foreground"><span className="font-mono text-xs uppercase opacity-80">Open Line</span><p>{reply}</p></div>}
           </div>
+        )}
+        {reply && onPosted && (
+          <button onClick={onPosted} className="mt-6 w-full border-2 border-foreground bg-foreground px-4 py-2 font-mono text-xs uppercase text-background">
+            Your message is on the board — view it
+          </button>
         )}
       </div>
     </section>

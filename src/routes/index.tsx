@@ -51,7 +51,7 @@ function Index() {
       </header>
       {tab === "voice" ? (
         <div>
-          <VoiceMessage />
+          <VoiceMessage onPosted={() => setTab("board")} />
           <IntakeDemo />
         </div>
       ) : (
