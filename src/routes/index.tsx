@@ -66,6 +66,7 @@ function Index() {
           </article>
         ))}
       </section>
+      )}
     </main>
   );
 }
