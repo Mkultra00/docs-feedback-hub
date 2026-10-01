@@ -2,9 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Play, Square, Loader2, Send, CheckCircle2, Mic, LayoutList } from "lucide-react";
 import { MessageBoard } from "@/components/MessageBoard";
-import { RoutingWorkflow } from "@/components/RoutingWorkflow";
 import { VoiceMessage } from "@/components/VoiceMessage";
-import { calls, sms, LINE_VOICE, type Call } from "@/lib/mock-intake";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,12 +17,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-const urgencyClass = {
-  high: "bg-destructive text-destructive-foreground",
-  medium: "bg-primary text-primary-foreground",
-  low: "bg-muted text-muted-foreground",
-};
 
 function Index() {
   const [tab, setTab] = useState<"voice" | "board">("board");
@@ -55,17 +47,7 @@ function Index() {
           <IntakeDemo />
         </div>
       ) : (
-        <div>
-          <MessageBoard />
-          <div className="border-t-4 border-foreground px-6 py-8 md:px-12">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">Simulated intake · demo data</p>
-            <h2 className="mt-2 text-3xl font-black uppercase">Sample calls & texts</h2>
-          </div>
-          <section className="grid gap-6 px-6 pb-8 md:grid-cols-2 md:px-12">
-            {calls.map((c) => <CallCard key={c.id} call={c} />)}
-            {sms.map((s) => <SmsCard key={s.id} s={s} />)}
-          </section>
-        </div>
+        <MessageBoard />
       )}
     </main>
   );
