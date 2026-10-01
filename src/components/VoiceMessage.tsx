@@ -14,7 +14,6 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   const [reply, setReply] = useState("");
   const [typed, setTyped] = useState("");
   const [sending, setSending] = useState(false);
-  const audio = useRef<HTMLAudioElement | null>(null);
   const rec = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
 
