@@ -17,6 +17,7 @@ export type Database = {
       board_messages: {
         Row: {
           agent_reply: string
+          audio_url: string | null
           borough: string
           category: string
           channel: string
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           agent_reply?: string
+          audio_url?: string | null
           borough?: string
           category?: string
           channel: string
@@ -39,6 +41,7 @@ export type Database = {
         }
         Update: {
           agent_reply?: string
+          audio_url?: string | null
           borough?: string
           category?: string
           channel?: string
