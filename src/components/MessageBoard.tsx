@@ -5,7 +5,7 @@ import { RoutingWorkflow } from "@/components/RoutingWorkflow";
 
 type Row = {
   id: string; channel: string; transcript: string; summary: string; category: string;
-  urgency: string; borough: string; created_at: string;
+  urgency: string; borough: string; created_at: string; audio_url?: string | null;
 };
 
 const urg: Record<string, string> = {
@@ -55,6 +55,11 @@ export function MessageBoard() {
               </p>
             </div>
           </button>
+          {r.audio_url && (
+            <div className="px-4 pb-4">
+              <audio controls preload="none" src={r.audio_url} className="w-full" aria-label="Voice recording" />
+            </div>
+          )}
           {openId === r.id && (
             <RoutingWorkflow category={r.category} borough={r.borough} onClose={() => setOpenId(null)} />
           )}

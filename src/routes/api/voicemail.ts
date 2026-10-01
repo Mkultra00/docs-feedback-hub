@@ -114,8 +114,18 @@ export const Route = createFileRoute("/api/voicemail")({
           };
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        let audio_url: string | null = null;
+        if (channel === "voice" && audio instanceof Blob) {
+          const path = `${Date.now()}-${crypto.randomUUID()}.webm`;
+          const up = await supabaseAdmin.storage.from("voicemails").upload(path, audio, { contentType: audio.type || "audio/webm" });
+          if (up.error) console.error("Audio upload failed", up.error);
+          else {
+            const sig = await supabaseAdmin.storage.from("voicemails").createSignedUrl(path, 60 * 60 * 24 * 365);
+            audio_url = sig.data?.signedUrl ?? null;
+          }
+        }
         const { error } = await supabaseAdmin.from("board_messages").insert({
-          channel, transcript, summary: r.summary, category: r.category, urgency: r.urgency, borough: r.borough, agent_reply: r.reply,
+          channel, transcript, audio_url, summary: r.summary, category: r.category, urgency: r.urgency, borough: r.borough, agent_reply: r.reply,
         });
         if (error) {
           console.error("Board insert failed", error);
