@@ -14,9 +14,17 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   const [reply, setReply] = useState("");
   const [typed, setTyped] = useState("");
   const [sending, setSending] = useState(false);
-  const audio = useRef<HTMLAudioElement | null>(null);
   const rec = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
+
+  const ctxRef = useRef<AudioContext | null>(null);
+  const srcRef = useRef<AudioBufferSourceNode | null>(null);
+
+  function unlock() {
+    ctxRef.current ??= new AudioContext();
+    ctxRef.current.resume().catch(() => {});
+    return ctxRef.current;
+  }
 
   async function speak(text: string) {
     const r = await fetch("/api/tts", {
@@ -25,15 +33,18 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
       body: JSON.stringify({ text, voiceId: LINE_VOICE }),
     });
     if (!r.ok) throw new Error("The agent's voice couldn't load.");
-    const url = URL.createObjectURL(await r.blob());
-    const a = audio.current!;
-    a.src = url;
-    await a.play();
-    await new Promise<void>((res) => { a.onended = () => res(); a.onpause = () => res(); });
+    const ctx = unlock();
+    await ctx.resume();
+    const buf = await ctx.decodeAudioData(await r.arrayBuffer());
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    srcRef.current = src;
+    await new Promise<void>((res) => { src.onended = () => res(); src.start(); });
   }
 
   function beep() {
-    const ctx = new AudioContext();
+    const ctx = unlock();
     const o = ctx.createOscillator();
     o.frequency.value = 880;
     o.connect(ctx.destination);
@@ -43,10 +54,7 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
 
   async function call() {
     setError(null); setTranscript(""); setReply("");
-    audio.current ??= new Audio();
-    // unlock playback on the click
-    audio.current.src = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA";
-    audio.current.play().catch(() => {});
+    unlock();
     try {
       stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
@@ -77,6 +85,7 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   }
 
   function stopRecording() {
+    unlock();
     rec.current?.stop();
     cleanup();
     setPhase("thinking");
@@ -103,6 +112,7 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   async function sendText(e: React.FormEvent) {
     e.preventDefault();
     if (!typed.trim()) return;
+    unlock();
     setError(null); setTranscript(typed.trim()); setReply(""); setSending(true);
     try {
       const fd = new FormData();
@@ -111,12 +121,13 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Something went wrong.");
       setReply(data.reply); setTyped("");
+      speak(data.reply).catch(() => {});
     } catch (err) { setError((err as Error).message); }
     finally { setSending(false); }
   }
 
   function hangUp() {
-    audio.current?.pause();
+    try { srcRef.current?.stop(); } catch { /* not started */ }
     if (rec.current?.state === "recording") { rec.current.onstop = null; rec.current.stop(); }
     cleanup();
     setPhase("idle");
