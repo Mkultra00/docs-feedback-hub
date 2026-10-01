@@ -1,0 +1,1 @@
+DELETE FROM public.board_messages WHERE transcript ILIKE '%Board visibility test%';
