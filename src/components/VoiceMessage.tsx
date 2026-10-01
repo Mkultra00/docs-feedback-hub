@@ -85,6 +85,7 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   }
 
   function stopRecording() {
+    unlock();
     rec.current?.stop();
     cleanup();
     setPhase("thinking");
@@ -111,6 +112,7 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
   async function sendText(e: React.FormEvent) {
     e.preventDefault();
     if (!typed.trim()) return;
+    unlock();
     setError(null); setTranscript(typed.trim()); setReply(""); setSending(true);
     try {
       const fd = new FormData();
@@ -119,12 +121,13 @@ export function VoiceMessage({ onPosted }: { onPosted?: () => void }) {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Something went wrong.");
       setReply(data.reply); setTyped("");
+      speak(data.reply).catch(() => {});
     } catch (err) { setError((err as Error).message); }
     finally { setSending(false); }
   }
 
   function hangUp() {
-    audio.current?.pause();
+    try { srcRef.current?.stop(); } catch { /* not started */ }
     if (rec.current?.state === "recording") { rec.current.onstop = null; rec.current.stop(); }
     cleanup();
     setPhase("idle");
