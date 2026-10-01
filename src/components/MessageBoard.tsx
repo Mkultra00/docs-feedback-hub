@@ -41,13 +41,26 @@ export function MessageBoard() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
+    let alive = true;
     const load = () =>
       supabase.from("board_messages").select("*").order("created_at", { ascending: false }).limit(100)
-        .then(({ data }) => setRows((data as Row[]) ?? []));
+        .then(({ data }) => { if (alive) setRows((data as Row[]) ?? []); });
     load();
     const ch = supabase.channel("board").on("postgres_changes", { event: "INSERT", schema: "public", table: "board_messages" }, load).subscribe();
-    return () => { supabase.removeChannel(ch); };
+    // Realtime can be blocked in some preview/embedded contexts — poll as a fallback.
+    const timer = setInterval(load, 5000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      supabase.removeChannel(ch);
+    };
   }, []);
+
 
   if (!rows) return <p className="px-6 py-8 font-mono text-sm md:px-12">Loading…</p>;
 
