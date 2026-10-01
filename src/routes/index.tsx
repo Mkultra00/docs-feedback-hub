@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Send, CheckCircle2, Mic, LayoutList } from "lucide-react";
 import { MessageBoard } from "@/components/MessageBoard";
 import { VoiceMessage } from "@/components/VoiceMessage";
