@@ -31,7 +31,7 @@ export function MessageBoard() {
   if (!rows.length) return <p className="px-6 py-8 text-muted-foreground md:px-12">No messages yet — leave one in the "Leave a message" tab.</p>;
 
   return (
-    <section className="grid gap-6 px-6 py-8 md:grid-cols-2 md:px-12">
+    <section className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-8 md:px-12">
       {rows.map((r) => (
         <article key={r.id} className="border-2 border-foreground bg-card">
           <button
