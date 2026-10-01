@@ -38,6 +38,7 @@ function mockTime(timeStr: string): number {
 export function MessageBoard() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const load = () =>
@@ -56,11 +57,35 @@ export function MessageBoard() {
     ...sms.map((thread): FeedItem => ({ kind: "sms", at: mockTime(thread.messages[0]!.at), thread })),
   ].sort((a, b) => b.at - a.at);
 
-  if (!feed.length) return <p className="px-6 py-8 text-muted-foreground md:px-12">No messages yet — leave one in the "Leave a message" tab.</p>;
+  const q = query.trim().toLowerCase();
+  const matches = (text: string) => text.toLowerCase().includes(q);
+  const filtered = q
+    ? feed.filter((item) =>
+        item.kind === "live"
+          ? matches(item.row.summary) || matches(item.row.transcript) || matches(item.row.category) || matches(item.row.borough)
+          : item.kind === "call"
+            ? matches(item.call.category) || matches(item.call.borough) || item.call.transcript.some((t) => matches(t.text))
+            : matches(item.thread.category) || matches(item.thread.borough) || item.thread.messages.some((m) => matches(m.text)),
+      )
+    : feed;
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-8 md:px-12">
-      {feed.map((item) => {
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search messages by keyword — e.g. heat, trash, Brooklyn…"
+        aria-label="Search messages by keyword"
+        className="w-full border-2 border-foreground bg-card px-4 py-3 font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+      />
+      {q && (
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          {filtered.length} {filtered.length === 1 ? "match" : "matches"} for "{query.trim()}"
+        </p>
+      )}
+      {!filtered.length && <p className="text-muted-foreground">{q ? "No messages match that keyword." : 'No messages yet — leave one in the "Leave a message" tab.'}</p>}
+      {filtered.map((item) => {
         const key = item.kind === "live" ? item.row.id : item.kind === "call" ? item.call.id : item.thread.id;
         const open = openId === key;
         const toggle = () => setOpenId(open ? null : key);
